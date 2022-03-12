@@ -25,6 +25,7 @@ func GeneratePassword(pw string) (string, error) {
 	return string(hash), err
 }
 
+// https://github.com/scalablescripts/go-auth/blob/main/controllers/authController.go
 func RegisterHandler(c *fiber.Ctx) error {
 	req := new(model.Register)
 	if err := c.BodyParser(req); err != nil {
@@ -101,16 +102,31 @@ func LoginHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	token, exp, err := CreateJWT(data)
+	token, err := CreateJWT(data)
 	if err != nil {
 		log.Println(color.RedString("ERROR", "Failed to Create Json Web Token"))
 		log.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"satus":   fiber.StatusInternalServerError,
+			"message": "로그인을 할  수 없는 오류가 발생했어요.",
+			"time":    time.Now(),
+		})
 	}
+
+	// Cookie 속성
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+	}
+
+	// Set Cookie
+	c.Cookie(&cookie)
 
 	return c.Status(200).JSON(fiber.Map{
 		"message": "로그인을 성공적으로 했어요!",
 		"token":   token,
-		"exp":     exp,
 		"time":    time.Now(),
 	})
 }
