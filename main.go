@@ -1,0 +1,1 @@
+package My_own_diary
