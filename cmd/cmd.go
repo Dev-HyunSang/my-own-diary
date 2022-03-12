@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -8,32 +9,16 @@ import (
 	"github.com/dev-hyunsang/my-own-diary/model"
 	"github.com/fatih/color"
 	"github.com/gofiber/fiber/v2"
+	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func IndexHandler(c *fiber.Ctx) error {
-	return c.Status(200).JSON(fiber.Map{
-		"message": "Hello!",
-	})
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(hashVal, userPw string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashVal), []byte(userPw))
-	if err != nil {
-		return false
-	} else {
-		return true
-	}
+func GeneratePassword(pw string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	return string(hash), err
 }
 
 func RegisterHandler(c *fiber.Ctx) error {
-	var user model.Register
-
 	req := new(model.Register)
 	if err := c.BodyParser(req); err != nil {
 		log.Println(color.RedString("ERROR"), "Failed to Fiber BodyParser")
@@ -42,40 +27,75 @@ func RegisterHandler(c *fiber.Ctx) error {
 
 	db, err := database.ConnectionDB()
 	if err != nil {
-		log.Println(color.RedString("ERROR"), "Failed Connection DataBase")
+		log.Println(color.RedString("ERROR"), "Failed to Connection DataBase")
 		log.Fatalln(err)
 	}
 
-	result := db.Find(&user, "email=?", user.Email)
+	hashPw, err := GeneratePassword(req.Password)
+	if err != nil {
+		log.Println(color.RedString("ERROR"), "Failed GenerateForm Password")
+		log.Println(err)
+	}
 
-	if result.RowsAffected != 0 {
+	userUUID := uuid.NewV4()
+	data := model.Users{
+		UUID:      userUUID,
+		Name:      req.Name,
+		Email:     req.Email,
+		Password:  hashPw,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	db.Create(&data)
+	log.Println(color.GreenString("SUCCESS"), fmt.Sprintf("UUID:%s | 생성 완료.", data.UUID))
+
+	return c.Status(200).JSON(map[string]string{
+		"stauts":  "200",
+		"message": fmt.Sprintf("%s님 어서오세요! 나만의 일기에 오신 것을 환영해요!", req.Name),
+		"time":    time.Now().String(),
+	})
+}
+
+func LoginIndexHandler(c *fiber.Ctx) error {
+	var data *model.Users
+	req := new(model.Login)
+	if err := c.BodyParser(req); err != nil {
+		log.Println(color.RedString("ERROR"), "Failed to BodyParser")
+		log.Fatalln(err)
+	}
+
+	db, err := database.ConnectionDB()
+	if err != nil {
+		log.Println(color.RedString("ERRPR"), "Failed to Connection DataBase")
+		log.Fatalln(err)
+	}
+	result := db.Where("email = ?", req.Email).Find(&data)
+
+	if result.RowsAffected == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "입력해 주신 정보로 회원 정보를 찾을 수 없네요. 다시 시도 해 주세요.")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(req.Password))
+	if err != nil {
+		log.Println(err)
 		return c.Status(fiber.StatusBadRequest).JSON(map[string]string{
 			"status":  "400",
-			"message": "동일한 이메일 주소가 있어요, 다시 확인 해 주세요!",
+			"message": "입력해 주신 정보로 회원 정보를 찾을 수 없네요. 다시 시도 해 주세요. / 비밀번호 틀림.",
 			"time":    time.Now().String(),
 		})
 	}
 
-	hashPw, err := HashPassword(user.Password)
+	token, exp, err := CreateJWT(data)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(map[string]string{
-			"status":  "500",
-			"message": "비밀번호가 다릅니다.",
-			"error":   err.Error(),
-		})
-	}
-	user.Password = hashPw
-	if err := db.Create(&user); err.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(map[string]string{
-			"status":  "500",
-			"message": "회원가입에 실패 하였어요. 다시 시도 해 주세요.",
-			"time":    time.Now().String(),
-		})
+		log.Println(color.RedString("ERROR", "Failed to Create Json Web Token"))
+		log.Println(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(map[string]string{
-		"status":  "200",
-		"message": "성공적으로 회원가입을 하였어요.",
-		"time":    time.Now().String(),
+	return c.Status(200).JSON(fiber.Map{
+		"message": "로그인을 성공적으로 했어요!",
+		"token":   token,
+		"exp":     exp,
+		"user":    data,
+		"time":    time.Now(),
 	})
 }
