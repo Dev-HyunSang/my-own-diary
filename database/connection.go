@@ -10,7 +10,7 @@ import (
 
 func ConnectionDB() (*gorm.DB, error) {
 	// user:password@tcp(location)/dbname
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true",
 		config.GetEnv("MYSQL_ACCOUNT"),
 		config.GetEnv("MYSQL_PASSWORD"),
 		config.GetEnv("MYSQL_LOCATION"),
