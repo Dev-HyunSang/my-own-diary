@@ -13,10 +13,9 @@ func CreateJWT(user *model.Users) (string, error) {
 
 	// Create the Claims
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"uuid":  user.UUID,
-		"email": user.Email,
-		"name":  user.Name,
-		"exp":   exp,
+		"uuid":      user.UUID.String(), // 로그인한 사용자의 UUID를 기록함.
+		"IssuedAt":  time.Now().Unix(),  // time.Now을 사용할 경우 time.time으로 반환됨, unix를 사용하는 경우 int64로 반환함.
+		"ExpiresAt": exp,
 	})
 
 	// Create token
