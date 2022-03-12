@@ -3,9 +3,17 @@
 "**나의 생각**"을 담는 서비스인 만큼 보안을 신경 써서 개발하고 있습니다.  
 
 ## TODO:
-- [ ] POST `/register`: 기본적인 회원가입
+- [X] POST `/register`: 회원가입 - 2022.03.12 개발 완료
+- [ ] POST `/login`: 로그인
+- [ ] POST `/logout`: 로그아웃
+
+### User
+- [ ] POST`/user/edit`: 회원정보 수정
+
 ## 사용한 기술 스택
-- Back-End: Golang
-  - [gofiber/fiber]()
-  - [gorm/gorm](gorm.io/gorm)
+> 사용한 기술 스택에 대해서 서술하였습니다. 
+
+- **Back-End: Golang**
+  - [`gofiber/fiber`](https://gofiber.io/)
+  - [`gorm/gorm`](gorm.io/gorm)
 - DataBase: MySQL
