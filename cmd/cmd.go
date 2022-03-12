@@ -80,7 +80,7 @@ func LoginIndexHandler(c *fiber.Ctx) error {
 		log.Println(err)
 		return c.Status(fiber.StatusBadRequest).JSON(map[string]string{
 			"status":  "400",
-			"message": "입력해 주신 정보로 회원 정보를 찾을 수 없네요. 다시 시도 해 주세요. / 비밀번호 틀림.",
+			"message": "입력해 주신 정보로 회원 정보를 찾을 수 없네요. 다시 시도 해 주세요.",
 			"time":    time.Now().String(),
 		})
 	}
