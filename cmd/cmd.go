@@ -13,6 +13,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func IndexHandler(c *fiber.Ctx) error {
+	return c.JSON(fiber.Map{
+		"message": "어서오세요. 나만의 일기장입니다.",
+		"time":    time.Now(),
+	})
+}
+
 func GeneratePassword(pw string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 	return string(hash), err
@@ -31,32 +38,41 @@ func RegisterHandler(c *fiber.Ctx) error {
 		log.Fatalln(err)
 	}
 
-	hashPw, err := GeneratePassword(req.Password)
-	if err != nil {
-		log.Println(color.RedString("ERROR"), "Failed GenerateForm Password")
-		log.Println(err)
-	}
+	var data model.Users
+	db.Where("email = ?", req.Email).Find(&data)
+	if req.Email == data.Email {
+		return c.Status(500).JSON(fiber.Map{
+			"status":   500,
+			"messaege": "동일한 메일이 있어요. 다른 메일로 시도 해 주세요.",
+			"time":     time.Now(),
+		})
+	} else {
+		hashPw, err := GeneratePassword(req.Password)
+		if err != nil {
+			log.Println(color.RedString("ERROR"), "Failed GenerateForm Password")
+			log.Println(err)
+		}
 
-	userUUID := uuid.NewV4()
-	data := model.Users{
-		UUID:      userUUID,
-		Name:      req.Name,
-		Email:     req.Email,
-		Password:  hashPw,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		userUUID := uuid.NewV4()
+		data := model.Users{
+			UUID:      userUUID,
+			Name:      req.Name,
+			Email:     req.Email,
+			Password:  hashPw,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		db.Create(&data)
+		log.Println(color.GreenString("SUCCESS"), fmt.Sprintf("UUID:%s | 생성 완료.", data.UUID))
+		return c.Status(200).JSON(map[string]string{
+			"stauts":  "200",
+			"message": fmt.Sprintf("%s님 어서오세요! 나만의 일기에 오신 것을 환영해요!", req.Name),
+			"time":    time.Now().String(),
+		})
 	}
-	db.Create(&data)
-	log.Println(color.GreenString("SUCCESS"), fmt.Sprintf("UUID:%s | 생성 완료.", data.UUID))
-
-	return c.Status(200).JSON(map[string]string{
-		"stauts":  "200",
-		"message": fmt.Sprintf("%s님 어서오세요! 나만의 일기에 오신 것을 환영해요!", req.Name),
-		"time":    time.Now().String(),
-	})
 }
 
-func LoginIndexHandler(c *fiber.Ctx) error {
+func LoginHandler(c *fiber.Ctx) error {
 	var data *model.Users
 	req := new(model.Login)
 	if err := c.BodyParser(req); err != nil {
@@ -95,7 +111,6 @@ func LoginIndexHandler(c *fiber.Ctx) error {
 		"message": "로그인을 성공적으로 했어요!",
 		"token":   token,
 		"exp":     exp,
-		"user":    data,
 		"time":    time.Now(),
 	})
 }
