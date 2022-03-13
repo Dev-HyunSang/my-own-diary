@@ -103,7 +103,7 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	token, err := CreateJWT(data)
 	if err != nil {
-		log.Println(color.RedString("ERROR", "Failed to Create Json Web Token"))
+		log.Println(color.RedString("ERROR"), "Failed to Create Json Web Token")
 		log.Println(err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"satus":   fiber.StatusInternalServerError,
