@@ -25,7 +25,6 @@ func GeneratePassword(pw string) (string, error) {
 	return string(hash), err
 }
 
-// https://github.com/scalablescripts/go-auth/blob/main/controllers/authController.go
 func RegisterHandler(c *fiber.Ctx) error {
 	req := new(model.Register)
 	if err := c.BodyParser(req); err != nil {
