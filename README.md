@@ -17,8 +17,13 @@
   - JWT으로 생성된 쿠키 삭제
 
 ### User
+- [ ] POST `/user/home`: 로그인 완료 후 메인
 - [ ] POST`/user/edit`: 회원정보 수정
 
+### Diary
+- [ ] POST `/diary/new`: 새로운 일기장을 만듭니다.
+- [ ] POST `/diary/edit`: 기존의 일기장을 수정합니다.
+- [ ] DELETE `/diary/:ID`
 
 ## 사용한 기술 스택
 > 사용한 기술 스택에 대해서 서술하였습니다. 
