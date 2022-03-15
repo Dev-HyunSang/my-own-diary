@@ -3,27 +3,32 @@
 "**나의 생각**"을 담는 서비스인 만큼 보안을 신경 써서 개발하고 있습니다.  
 
 ## TODO:
-- [X] POST `/register`: 회원가입 - 2022.03.12 개발 완료
+- [X] POST `/api/register`: 회원가입 - 2022.03.12 개발 완료
   - 사용자가 입력한 패스워드를 암호화 하여서 DB에 저장합니다.
   - 사용자가 입력한 개인 정보를 바탕으로 DB에 저장합니다.
   - **동일한 메일 주소를 사용한 사용자가 있는 경우:**
     - 가입이 되지 않도록 제한합니다.
-- [ ] POST `/login`: 로그인
+- [X] POST `/api/login`: 로그인 - 2022.03.13 개발 완료
   - 사용자가 입력한 메일과 패스워드를 통하여서 검증합니다.
      - 입력된 메일 주소가 가입된 유저 정보에 없는 경우 로그인 되지 않음.
   - DB에 암호화 된 비밀번호와 사용자가 입력한 비밀번호와 대조합니다.
-    -  동일하지 않으면 로그인이 되지 않음.
-- [ ] POST `/logout`: 로그아웃
+    -  동일하지 않으면 로그인이 되지 않음.s
+- [X] POST `/api/logout`: 로그아웃 - 2022.03.13 개발 완료
   - JWT으로 생성된 쿠키 삭제
+- [ ] POST `/api/find`: 비밀번호 찾기
+  - 메일을 통한 비밀번호 찾기
+  - 인증 번호를 사용하기
 
 ### User
-- [ ] POST `/user/home`: 로그인 완료 후 메인
-- [ ] POST`/user/edit`: 회원정보 수정
+- [X] POST `/api/user/home`: 로그인 완료 후 메인 - 2022.03.
+  - JWT 검증
+  - JWT에 저장되어 있는 정보를 통한 유저 정보 확인
+- [ ] POST `/api/user/edit`: 회원정보 수정
 
 ### Diary
-- [ ] POST `/diary/new`: 새로운 일기장을 만듭니다.
-- [ ] POST `/diary/edit`: 기존의 일기장을 수정합니다.
-- [ ] DELETE `/diary/:ID`
+- [ ] POST `/api/diary/new`: 새로운 일기장을 만듭니다.
+- [ ] POST `/api/diary/edit`: 기존의 일기장을 수정합니다.
+- [ ] DELETE `/api/diary/:ID`: 기존의 일기장을 삭제합니다.
 
 ## 사용한 기술 스택
 > 사용한 기술 스택에 대해서 서술하였습니다. 
@@ -31,4 +36,6 @@
 - **Back-End: Golang**
   - [`gofiber/fiber`](https://gofiber.io/)
   - [`gorm/gorm`](gorm.io/gorm)
+  - **Json Web Token:**
+    - [`golang-jwt/jwt/v4`]
 - DataBase: MySQL
