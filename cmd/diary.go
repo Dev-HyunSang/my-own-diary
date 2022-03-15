@@ -23,8 +23,7 @@ func DiaryNewHandler(c *fiber.Ctx) error {
 	}
 
 	var (
-		user       model.Users
-		groupValue string
+		user model.Users
 	)
 
 	req := new(model.Diary)
