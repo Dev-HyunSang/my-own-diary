@@ -9,7 +9,7 @@ import (
 type Diary struct {
 	gorm.Model
 	DiaryUUID string    `json:"diary_uuid" gorm:"primaryKey;"`
-	UserUUID  string    `json:"user_uuid"`
+	UserUUID  string    `json:"user_uuid"` // 생성한 유저의 UUID를 기록합니다.
 	Group     string    `json:"diary_group"`
 	Content   string    `json:"content"`
 	Password  string    `json:"password"`
