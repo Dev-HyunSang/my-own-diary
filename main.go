@@ -19,7 +19,8 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = db.AutoMigrate(&model.Users{}, &model.Diary{})
+	err = db.AutoMigrate(
+		&model.Users{}, &model.Diary{})
 	if err != nil {
 		log.Println(color.RedString("ERROR"), "Failed to DataBase AutoMigrate")
 		log.Fatalln(err)
@@ -29,7 +30,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		AppName: "my own diary",
 	})
-
+	app.Static("/", "./public")
 	app.Use(cors.New(cors.Config{
 		AllowMethods: strings.Join([]string{
 			fiber.MethodGet,
