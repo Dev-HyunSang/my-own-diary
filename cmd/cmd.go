@@ -55,7 +55,7 @@ func RegisterHandler(c *fiber.Ctx) error {
 
 		userUUID := uuid.NewV4()
 		data := model.Users{
-			UUID:      userUUID,
+			UUID:      userUUID.String(),
 			Name:      req.Name,
 			Email:     req.Email,
 			Password:  hashPw,
