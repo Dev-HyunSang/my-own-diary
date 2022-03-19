@@ -79,3 +79,41 @@ func NewDiaryHandler(c *fiber.Ctx) error {
 		"time":    time.Now().Format("2006-01-02 15:04:05"),
 	})
 }
+
+func AllDiaryListHandler(c *fiber.Ctx) error {
+	var (
+		diaryData []model.Diary
+	)
+
+	cookie := c.Cookies("jwt")
+	claims, err := VerificationJWT(cookie)
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  fiber.StatusInternalServerError,
+			"message": "Failed to Verification JWT",
+			"time":    time.Now(),
+		})
+	}
+
+	db, err := database.ConnectionDB()
+	if err != nil {
+		log.Println(color.RedString("ERROR"), "Failed to Connection DataBase")
+		log.Println(err)
+	}
+
+	reslut := db.Where("user_uuid = ?", claims.Issuer).Find(&diaryData)
+	if reslut.RowsAffected == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  200,
+			"message": "아직 등록되어 있는 일기가 없어요! 저랑 같이 일기 쓰시러 가실래요?",
+			"time":    time.Now(),
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status":  200,
+		"message": "성공적으로 모든 일기장을 불러왔어요!",
+		"datas":   diaryData,
+		"time":    time.Now(),
+	})
+}
