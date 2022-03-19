@@ -11,7 +11,7 @@ import (
 	"github.com/twinj/uuid"
 )
 
-func DiaryNewHandler(c *fiber.Ctx) error {
+func NewDiaryHandler(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 	claims, err := VerificationJWT(cookie)
 	if err != nil {
@@ -27,6 +27,10 @@ func DiaryNewHandler(c *fiber.Ctx) error {
 	)
 
 	req := new(model.Diary)
+	if err := c.BodyParser(req); err != nil {
+		log.Println(color.RedString("ERROR"), "Failed to BodyParser")
+		log.Println(err)
+	}
 
 	db, err := database.ConnectionDB()
 	if err != nil {
@@ -48,6 +52,7 @@ func DiaryNewHandler(c *fiber.Ctx) error {
 	diary := model.Diary{
 		DiaryUUID: diaryToken.String(),
 		UserUUID:  user.UUID,
+		Title:     req.Title,
 		Group:     req.Group,
 		Content:   req.Content,
 		Password:  diaryPassword,
@@ -55,7 +60,8 @@ func DiaryNewHandler(c *fiber.Ctx) error {
 		RevisedAt: time.Now(),
 	}
 
-	db.Create(diary)
+	result := db.Create(&diary)
+	log.Println(color.GreenString("SUCCESS"), "Created Diary Content", result.RowsAffected)
 
 	// 추후 개선 필요
 	// 현재는 ""의 경우에만 됨, 추후 프론트엔드 단과 백엔드단에서의 교차 검증 필요
