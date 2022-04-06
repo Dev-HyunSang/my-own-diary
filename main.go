@@ -47,6 +47,10 @@ func main() {
 	user := app.Group("/api/user")
 	user.Get("/home", cmd.HomeHandler)
 
+	diary := app.Group("/api/diary")
+	diary.Post("/new", cmd.NewDiaryHandler)
+	diary.Get("/all", cmd.AllDiaryListHandler)
+
 	if err = app.Listen(":3000"); err != nil {
 		log.Println(color.RedString("ERROR"), "Failed to Fiber Listen")
 		log.Fatalln(err.Error())
